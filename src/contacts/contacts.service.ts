@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Contact } from './contact.model';
 import { v4 as uuid } from 'uuid';
 import { CreateContactDto } from './dto/create-contact.dto';
@@ -52,7 +52,13 @@ export class ContactsService {
   }
 
   getContactById(id: string): Contact {
-    return this.contacts.find((contact) => contact.id === id);
+    const found = this.contacts.find((contact) => contact.id === id);
+
+    if (!found) {
+      throw new NotFoundException(`Contact with ID "${id}" not found`);
+    }
+
+    return found;
   }
 
   createContact(createContactDto: CreateContactDto): Contact {
@@ -70,6 +76,7 @@ export class ContactsService {
   }
 
   deleteContact(id: string): void {
-    this.contacts = this.contacts.filter((contact) => contact.id !== id);
+    const found = this.getContactById(id);
+    this.contacts = this.contacts.filter((contact) => contact.id !== found.id);
   }
 }
